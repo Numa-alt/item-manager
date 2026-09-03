@@ -14,12 +14,24 @@ class Item
 public:
 
   Item(ItemId id, std::string name, int price)
+    :mId(id),mName(std::move(name)),mPrice(price)
   {
-    mId = id;
-    mName = std::move(name);
-    mPrice = price;
+  }
+  
+  ItemId GetItemId() const
+  {
+    return mId;
+  }
+  int GetPrice() const
+  {
+    return mPrice;
+  }
+  const std::string& GetName() const
+  {
+    return mName;
   }
 
+private:
   ItemId mId;
   std::string mName;
   int mPrice;
@@ -27,11 +39,11 @@ public:
 
 
 //商品管理
-class ItemList
+class ItemManager
 {
 private:
   ItemId mNextItemId = 0;
-  std::vector<Item> mItemLists;
+  std::vector<Item> mItems;
 
   ItemId GenerateItemId()
   {
@@ -40,36 +52,27 @@ private:
   }
 
 public:
-  
-//商品追加
+
+  //商品追加
   ItemId AddItem( std::string name, int price )
   {
     ItemId itemId = GenerateItemId();
-    // Item item = {itemId,name,price};
-    mItemLists.emplace_back( itemId, std::move(name), price );
+    mItems.emplace_back( itemId, std::move(name), price );
     return itemId;
-  }
-  
-  //商品一覧を表示する
-  void DisplayItemList()const
-  {
-      for( const Item& item : mItemLists ){
-        std::cout<<"ID:"<<item.mId<<" name:"<<item.mName<<" price "<<item.mPrice<<'\n';
-      }
   }
 
   //IDから商品を検索する
   const Item *SearchItemById( ItemId id ) const
   {
     auto it = std::find_if(
-      mItemLists.begin(),
-      mItemLists.end(),
+      mItems.begin(),
+      mItems.end(),
       [id](const Item& a)
       {
-        return id == a.mId;
+        return id == a.GetItemId();
       }
     );
-    if( it != mItemLists.end() ){
+    if( it != mItems.end() ){
       return &(*it);
     }
     return nullptr;
@@ -78,26 +81,27 @@ public:
   bool RemoveItemById( ItemId id )
   {
     auto newEnd = std::remove_if(
-      mItemLists.begin(),
-      mItemLists.end(),
+      mItems.begin(),
+      mItems.end(),
       [id]( const Item& a)
       {
-        return id == a.mId;
+        return id == a.GetItemId();
       }
     );
-    if( newEnd == mItemLists.end() )
+    if( newEnd == mItems.end() )
     {
       return false;
     }
-    mItemLists.erase( newEnd, mItemLists.end() );
+    mItems.erase( newEnd, mItems.end() );
     return true;
   }
 
   //価格順に商品を表示する
-  void DisplaySortedItemListByPrice()const
+  //void DisplaySortedItemListByPrice()const
+  const std::vector<Item*> GetItemListSortedByPrice()const
   {
     std::vector<const Item*> list;
-    for( const Item &item : mItemLists)
+    for( const Item &item : mItems)
     {
         list.push_back( &item );
     }
@@ -106,27 +110,26 @@ public:
       list.end(),
       [](const Item *a, const Item *b)
       {
-        return a->mPrice < b->mPrice;
+        return a->GetPrice() < b->GetPrice();
       }
     );
+    return list;
+  }
 
-    for( const Item *item : list )
-    {
-      std::cout<<"Id "<<item->mId<<" "<<item->mName<<" "<<item->mPrice<<"\n";
-    }
+  const std::vector<Item>& GetItems() const
+  {
+    return mItems;
   }
 };
-
-
 
 int main()
 {
   std::cout<<"hello item-manager"<<'\n';
 
-  ItemList itemList;
-  itemList.AddItem( "apple",100);
-  itemList.AddItem("grape", 150);
-  itemList.AddItem("banana", 80);
+  ItemManager itemManager;
+  itemManager.AddItem("apple",100);
+  itemManager.AddItem("grape", 150);
+  itemManager.AddItem("banana", 80);
 
   while(1){
     std::cout<<"\n";
@@ -138,7 +141,7 @@ int main()
     std::cout<<" 5:Display Sorted list by price\n";
     std::cout<<" 0:End\n\n";
     std::cout<<" command? ";
-    //count++;
+
     int input = 0;
     std::cin>>input;
 
@@ -153,21 +156,28 @@ int main()
         exit = true;
         break;
 
-      case 1://商品追加
+      case 1://商品追加private:
         {
           std::cout<<"name?";
           std::string name;
           std::cin>>name;
           std::cout<<"price?";
-          int price=0;
+          int price = 0;
           std::cin>>price;
-          ItemId id = itemList.AddItem( name, price );
+          ItemId id = itemManager.AddItem( name, price );
           std::cout<<"item add id:" << id<<"\n";
         }
         break;
 
       case 2://リスト表示
-        itemList.DisplayItemList();
+        // itemManager.DisplayItemList();
+        {
+          const std::vector<Item> &items = itemManager.GetItems();
+          for( const Item &item : items)
+          {
+            std::cout<<"Id:"<<item.GetItemId() << " name:" << item.GetName() << " price:"<<item.GetPrice()<<"\n";
+          }
+        }
         std::cout<<"\n";
         break;
 
@@ -176,11 +186,11 @@ int main()
           ItemId id;
           std::cout<<"Input search id:";
           std::cin>>id;
-          const Item *item = itemList.SearchItemById( id );
+          const Item *item = itemManager.SearchItemById( id );
           if( item != nullptr)
           {
             std::cout<<"find!\n";
-            std::cout<<"id:"<<id<<" "<<item->mName <<" "<<item->mPrice<<"\n";
+            std::cout<<"id:"<<id<<" "<<item->GetName() <<" "<<item->GetPrice()<<"\n";
           }
           else
           {
@@ -194,7 +204,7 @@ int main()
           ItemId id;
           std::cout<<"Input remove id:";
           std::cin>>id;
-          bool result=itemList.RemoveItemById( id );
+          bool result = itemManager.RemoveItemById( id );
           if( result )
           {
             std::cout<<"remove "<<id<<" is success!\n";
@@ -206,8 +216,16 @@ int main()
 
         }
         break;
+
       case 5:
-        itemList.DisplaySortedItemListByPrice();
+        {
+          const std::vector<Item*> items = itemManager.GetItemListSortedByPrice();
+          // for( const Item *item : list )
+          // {
+          //   std::cout<<"Id "<<item->GetItemId()<<" "<<item->GetName()<<" "<<item->GetPrice()<<"\n";
+          // }
+
+        }
         std::cout<<"\n";
         break;
     }
