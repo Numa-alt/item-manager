@@ -96,9 +96,8 @@ public:
     return true;
   }
 
-  //価格順に商品を表示する
-  //void DisplaySortedItemListByPrice()const
-  const std::vector<Item*> GetItemListSortedByPrice()const
+  //価格順に並び替えた商品のリストを取得する
+  std::vector<const Item*> GetItemListSortedByPrice()const
   {
     std::vector<const Item*> list;
     for( const Item &item : mItems)
@@ -149,14 +148,14 @@ int main()
     switch(input)
     {
       default://不正な値
-        std::cout<<"iligal command no:"<<input<<'\n';
+        std::cout<<"illegal command no:"<<input<<'\n';
         break;
 
       case 0://終了
         exit = true;
         break;
 
-      case 1://商品追加private:
+      case 1://商品追加
         {
           std::cout<<"name?";
           std::string name;
@@ -170,7 +169,6 @@ int main()
         break;
 
       case 2://リスト表示
-        // itemManager.DisplayItemList();
         {
           const std::vector<Item> &items = itemManager.GetItems();
           for( const Item &item : items)
@@ -213,17 +211,16 @@ int main()
           {
             std::cout<<"remove "<<id<<" is failed\n";
           }
-
         }
         break;
 
-      case 5:
+      case 5://価格順の商品リストを表示する
         {
-          const std::vector<Item*> items = itemManager.GetItemListSortedByPrice();
-          // for( const Item *item : list )
-          // {
-          //   std::cout<<"Id "<<item->GetItemId()<<" "<<item->GetName()<<" "<<item->GetPrice()<<"\n";
-          // }
+          std::vector<const Item*> items = itemManager.GetItemListSortedByPrice();
+          for( const Item *item : items )
+          {
+             std::cout<<"Id "<<item->GetItemId()<<" "<<item->GetName()<<" "<<item->GetPrice()<<"\n";
+          }
 
         }
         std::cout<<"\n";
