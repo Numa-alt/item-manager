@@ -140,9 +140,24 @@ public:
   }
 };
 
+
+  
+
+
 int main()
 {
+  enum class MenuCommand{
+    End = 0,
+    Add = 1,
+    DisplayList = 2,
+    Search = 3,
+    Remove = 4,
+    DisplaySorted = 5,
+    DisplayPrice = 6,
+  };
+  
   std::cout<<"hello item-manager"<<'\n';
+
 
   ItemManager itemManager;
   itemManager.AddItem("apple",100);
@@ -163,19 +178,20 @@ int main()
 
     int input = 0;
     std::cin>>input;
+    const MenuCommand menu = static_cast<MenuCommand>(input);
 
     bool exit = false;
-    switch(input)
+    switch(menu)
     {
       default://不正な値
         std::cout<<"illegal command no:"<<input<<'\n';
         break;
 
-      case 0://終了
+      case MenuCommand::End://終了
         exit = true;
         break;
 
-      case 1://商品追加
+      case MenuCommand::Add://商品追加
         {
           std::cout<<"name?";
           std::string name;
@@ -188,7 +204,7 @@ int main()
         }
         break;
 
-      case 2://リスト表示
+      case MenuCommand::DisplayList://リスト表示
         {
           const std::vector<Item> &items = itemManager.GetItems();
           for( const Item &item : items)
@@ -199,7 +215,7 @@ int main()
         std::cout<<"\n";
         break;
 
-      case 3://ID検索
+      case MenuCommand::Search://ID検索
         {
           ItemId id;
           std::cout<<"Input search id:";
@@ -217,7 +233,7 @@ int main()
         }
         break;
 
-      case 4://IDで削除
+      case MenuCommand::Remove://IDで削除
         {
           ItemId id;
           std::cout<<"Input remove id:";
@@ -234,7 +250,7 @@ int main()
         }
         break;
 
-      case 5://価格順の商品リストを表示する
+      case MenuCommand::DisplaySorted://価格順の商品リストを表示する
         {
           std::vector<const Item*> items = itemManager.GetItemListSortedByPrice();
           for( const Item *item : items )
@@ -246,7 +262,7 @@ int main()
         std::cout<<"\n";
         break;
 
-      case 6://IDを指定して価格を取得し表示する
+      case MenuCommand::DisplayPrice://IDを指定して価格を取得し表示する
         {
           ItemId id;
           std::cout<<"Input display price id:";
