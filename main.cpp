@@ -3,6 +3,7 @@
 #include <string>
 #include <utility>
 #include <algorithm>
+#include <optional>
 
 //商品ID
 using ItemId = int;
@@ -119,6 +120,24 @@ public:
   {
     return mItems;
   }
+
+  std::optional<int> GetPriceById( ItemId id ) const
+  {
+    auto it = std::find_if(
+      mItems.begin(),
+      mItems.end(),
+      [id](const Item& item)
+      {
+        return ( item.GetItemId() == id );
+      }
+    );
+
+    if( it != mItems.end())
+    {
+        return it->GetPrice();
+    }
+    return std::nullopt;
+  }
 };
 
 int main()
@@ -137,7 +156,8 @@ int main()
     std::cout<<" 2:display list\n";
     std::cout<<" 3:search by id\n";
     std::cout<<" 4:remove by id\n";
-    std::cout<<" 5:Display Sorted list by price\n";
+    std::cout<<" 5:display sorted list by price\n";
+    std::cout<<" 6:display price by id\n";
     std::cout<<" 0:End\n\n";
     std::cout<<" command? ";
 
@@ -224,6 +244,23 @@ int main()
 
         }
         std::cout<<"\n";
+        break;
+
+      case 6://IDを指定して価格を取得し表示する
+        {
+          ItemId id;
+          std::cout<<"Input display price id:";
+          std::cin>>id;
+          std::optional<int> price = itemManager.GetPriceById(id);
+          if(price)
+          {
+            std::cout<<"Id:"<<id<<" price:"<< price.value() <<"\n";
+          }
+          else
+          {
+            std::cout<<"Not found id:"<<id<<"\n";
+          }
+        }
         break;
     }
 
